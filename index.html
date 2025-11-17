@@ -1,0 +1,150 @@
+<!--
+SETUP:
+1) Replace API_BASE with your Apps Script Web App URL (ending with /exec)
+2) Commit this file
+3) Enable GitHub Pages (Step 3 below)
+-->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Townhall Check-In / Check-Out</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#64748b; --bg:#f6f7fb; --card:#fff; }
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .wrap{max-width:560px;margin:28px auto;padding:0 16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 10px 25px rgba(2,8,20,.06);padding:20px}
+    h1{margin:0 0 6px;font-size:20px}
+    p.muted{margin:6px 0 16px;color:var(--muted)}
+    .row{display:flex;gap:8px;align-items:center}
+    input[type=text]{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;font-size:16px;outline:none}
+    input[type=text]:focus{border-color:#3b82f6}
+    button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;cursor:pointer;background:#0ea5e9;color:#fff}
+    button.secondary{background:#e2e8f0;color:#0f172a}
+    button.ok{background:#10b981}
+    button.warn{background:#f59e0b}
+    .spacer{height:12px}
+    .msg{padding:10px 12px;border-radius:10px}
+    .msg.ok{background:#ecfeff;color:#155e75}
+    .msg.err{background:#fee2e2;color:#7f1d1d}
+    .emp{padding:12px 16px;border:1px dashed #e2e8f0;border-radius:12px;background:#fafafa}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .pill.in{background:#ecfdf5;color:#065f46}
+    .pill.out{background:#fef2f2;color:#7f1d1d}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .hide{display:none}
+    .mutebar{color:#334155;font-size:14px}
+    .footer{margin-top:10px;font-size:12px;color:#94a3b8;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Townhall Check-In / Check-Out</h1>
+      <p class="muted">Scan QR → Enter Employee ID → Fetch → Check In / Out.</p>
+      <div class="row">
+        <input id="empId" type="text" inputmode="numeric" placeholder="Enter Employee ID">
+        <button onclick="fetchDetails()">Fetch</button>
+      </div>
+
+      <div id="msg" class="spacer"></div>
+
+      <div id="panel" class="emp hide">
+        <div class="grid">
+          <div><strong>Name:</strong> <span id="empName">—</span></div>
+          <div><strong>Department:</strong> <span id="empDept">—</span></div>
+          <div><strong>Email:</strong> <span id="empEmail">—</span></div>
+          <div><strong>Employee ID:</strong> <span id="empIdDisplay">—</span></div>
+        </div>
+        <div class="spacer"></div>
+        <div><strong>Status:</strong> <span id="empStatus" class="pill out">Not Marked</span></div>
+        <div class="spacer"></div>
+        <div class="row">
+          <button class="ok"  onclick="doCheck('checkin')">Check In</button>
+          <button class="warn" onclick="doCheck('checkout')">Check Out</button>
+          <button class="secondary" onclick="resetUI()">Clear</button>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <div id="summary" class="mutebar"></div>
+    </div>
+    <div class="footer">Backed by Google Sheets (via Apps Script).</div>
+  </div>
+
+<script>
+  // 1) PASTE YOUR APPS SCRIPT URL HERE (must end with /exec)
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec';
+
+  function setMsg(text, ok){
+    const el = document.getElementById('msg');
+    if(!text){ el.className='spacer'; el.textContent=''; return; }
+    el.className = 'msg ' + (ok ? 'ok' : 'err');
+    el.textContent = text;
+  }
+
+  function paint(emp){
+    document.getElementById('panel').classList.remove('hide');
+    document.getElementById('empName').textContent = emp.name || '—';
+    document.getElementById('empDept').textContent = emp.department || '—';
+    document.getElementById('empEmail').textContent = emp.email || '—';
+    document.getElementById('empIdDisplay').textContent = emp.id || '—';
+    const pill = document.getElementById('empStatus');
+    const s = (emp.status || 'Not Marked').toUpperCase();
+    pill.textContent = s; pill.className = 'pill ' + (s==='IN' ? 'in' : 'out');
+  }
+
+  function resetUI(){
+    setMsg('', true);
+    document.getElementById('panel').classList.add('hide');
+    document.getElementById('empId').value = '';
+    document.getElementById('empId').focus();
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url, { method:'GET' });
+    return res.json();
+  }
+
+  async function fetchDetails(){
+    const id = (document.getElementById('empId').value || '').trim();
+    if(!id){ setMsg('Please enter an Employee ID.', false); return; }
+    setMsg('', true);
+    try{
+      const data = await fetchJSON(`${API_BASE}?action=lookup&id=${encodeURIComponent(id)}`);
+      if(!data || data.ok !== true){ setMsg((data && data.error) || 'Lookup failed.', false); return; }
+      paint(data.employee);
+      refreshSummary();
+    }catch(e){ setMsg('Lookup failed.', false); }
+  }
+
+  async function doCheck(kind){
+    const id = (document.getElementById('empId').value || '').trim();
+    if(!id) return;
+    try{
+      const data = await fetchJSON(`${API_BASE}?action=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`);
+      if(!data || data.ok !== true){ setMsg((data && data.error) || 'Update failed.', false); return; }
+      setMsg(kind==='checkin' ? 'Checked in successfully.' : 'Checked out successfully.', true);
+      paint(data.employee);
+      refreshSummary();
+    }catch(e){ setMsg('Update failed.', false); }
+  }
+
+  async function refreshSummary(){
+    try{
+      const data = await fetchJSON(`${API_BASE}?action=summary`);
+      if(data && data.ok){
+        document.getElementById('summary').textContent =
+          `Summary — Total: ${data.total} • IN: ${data.inCount} • OUT: ${data.outCount}`;
+      }
+    }catch(e){}
+  }
+
+  window.addEventListener('load', function(){
+    document.getElementById('empId').focus();
+    refreshSummary();
+  });
+</script>
+</body>
+</html>
