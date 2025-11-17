@@ -10,7 +10,7 @@ SETUP:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Q3 Townhall Check-In / Check-Out</title>
+  <title>Townhall Check-In / Check-Out</title>
   <style>
     :root { --ink:#0f172a; --muted:#64748b; --bg:#f6f7fb; --card:#fff; }
     html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -19,8 +19,8 @@ SETUP:
     h1{margin:0 0 6px;font-size:20px}
     p.muted{margin:6px 0 16px;color:var(--muted)}
     .row{display:flex;gap:8px;align-items:center}
-    input[type=text]{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;font-size:16px;outline:none}
-    input[type=text]:focus{border-color:#3b82f6}
+    input[type=tel]{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;font-size:16px;outline:none}
+    input[type=tel]:focus{border-color:#3b82f6}
     button{padding:12px 16px;border:0;border-radius:12px;font-weight:600;cursor:pointer;background:#0ea5e9;color:#fff}
     button.secondary{background:#e2e8f0;color:#0f172a}
     button.ok{background:#10b981}
@@ -43,19 +43,24 @@ SETUP:
   <div class="wrap">
     <div class="card">
       <h1>Townhall Check-In / Check-Out</h1>
-      <p class="muted">Scan QR → Enter Employee ID/Mobile → Fetch → Check In / Out.</p>
-     <div class="row">
-  <input id="empId" type="text" inputmode="numeric" placeholder="Enter Employee ID or Mobile">
-</div>
+      <p class="muted">Scan QR → Enter your mobile number → Fetch → Check In / Out.</p>
 
+      <!-- INPUT + FETCH -->
+      <div class="row">
+        <input id="empId" type="tel" inputmode="tel" placeholder="Enter mobile number">
+        <button onclick="fetchDetails()">Fetch</button>
+      </div>
+
+      <!-- MESSAGE -->
       <div id="msg" class="spacer"></div>
 
+      <!-- EMPLOYEE DETAILS + ACTIONS -->
       <div id="panel" class="emp hide">
         <div class="grid">
           <div><strong>Name:</strong> <span id="empName">—</span></div>
           <div><strong>Department:</strong> <span id="empDept">—</span></div>
           <div><strong>Email:</strong> <span id="empEmail">—</span></div>
-          <div><strong>Employee ID:</strong> <span id="empIdDisplay">—</span></div>
+          <div><strong>Mobile:</strong> <span id="empMobile">—</span></div>
         </div>
         <div class="spacer"></div>
         <div><strong>Status:</strong> <span id="empStatus" class="pill out">Not Marked</span></div>
@@ -70,11 +75,13 @@ SETUP:
       <div class="spacer"></div>
       <div id="summary" class="mutebar"></div>
     </div>
-    <div class="footer">© Anooj Korampatta | Backed by Google Sheets (via Apps Script)</div>
+    <div class="footer">Backed by Google Sheets (via Apps Script).</div>
   </div>
 
 <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec'; // keep as is if already set
+  // >>>>>>> REPLACE THIS WITH YOUR EXEC URL <<<<<<<
+  const API_BASE = 'YOUR_GAS_EXEC_URL_HERE';
+
   function setMsg(text, ok){
     const el = document.getElementById('msg');
     if(!text){ el.className='spacer'; el.textContent=''; return; }
@@ -84,10 +91,10 @@ SETUP:
 
   function paint(emp){
     document.getElementById('panel').classList.remove('hide');
-    document.getElementById('empName').textContent = emp.name || '—';
-    document.getElementById('empDept').textContent = emp.department || '—';
-    document.getElementById('empEmail').textContent = emp.email || '—';
-    document.getElementById('empIdDisplay').textContent = emp.id || '—';
+    document.getElementById('empName').textContent   = emp.name   || '—';
+    document.getElementById('empDept').textContent   = emp.department || '—';
+    document.getElementById('empEmail').textContent  = emp.email  || '—';
+    document.getElementById('empMobile').textContent = emp.mobile || '—';
 
     const pill = document.getElementById('empStatus');
     const s = (emp.status || 'Not Marked').toUpperCase();
@@ -102,45 +109,60 @@ SETUP:
     document.getElementById('empId').focus();
   }
 
-  async function doCheck(kind){
+  async function fetchJSON(url){
+    const res = await fetch(url, { method:'GET' });
+    return res.json();
+  }
+
+  async function fetchDetails(){
     const id = (document.getElementById('empId').value || '').trim();
     if(!id){
-      setMsg('Please enter Employee ID or Mobile.', false);
+      setMsg('Please enter a mobile number.', false);
       return;
     }
     setMsg('', true);
+    try{
+      const data = await fetchJSON(`${API_BASE}?action=lookup&id=${encodeURIComponent(id)}`);
+      if(!data || data.ok !== true){
+        setMsg((data && data.error) || 'Lookup failed.', false);
+        document.getElementById('panel').classList.add('hide');
+        return;
+      }
+      paint(data.employee);
+      refreshSummary();
+    }catch(e){
+      setMsg('Lookup failed.', false);
+    }
+  }
 
-    try {
-      const url = `${API_BASE}?action=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-
+  async function doCheck(kind){
+    const id = (document.getElementById('empId').value || '').trim();
+    if(!id){
+      setMsg('Please enter a mobile number.', false);
+      return;
+    }
+    setMsg('', true);
+    try{
+      const data = await fetchJSON(`${API_BASE}?action=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`);
       if(!data || data.ok !== true){
         setMsg((data && data.error) || 'Update failed.', false);
         return;
       }
-
-      // message
       if (data.already) {
         setMsg(data.message || (kind === 'checkin' ? 'Already checked in.' : 'Not currently checked in.'), true);
       } else {
         setMsg(kind === 'checkin' ? 'Checked in successfully.' : 'Checked out successfully.', true);
       }
-
-      // show employee details
       if (data.employee) paint(data.employee);
-
-      // refresh summary
       refreshSummary();
-    } catch(e) {
+    }catch(e){
       setMsg('Update failed.', false);
     }
   }
 
   async function refreshSummary(){
     try{
-      const res = await fetch(`${API_BASE}?action=summary`);
-      const data = await res.json();
+      const data = await fetchJSON(`${API_BASE}?action=summary`);
       if(data && data.ok){
         document.getElementById('summary').textContent =
           `Summary — Total: ${data.total} • IN: ${data.inCount} • OUT: ${data.outCount}`;
@@ -153,6 +175,5 @@ SETUP:
     refreshSummary();
   });
 </script>
-
 </body>
 </html>
