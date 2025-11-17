@@ -44,10 +44,9 @@ SETUP:
     <div class="card">
       <h1>Townhall Check-In / Check-Out</h1>
       <p class="muted">Scan QR → Enter Employee ID/Mobile → Fetch → Check In / Out.</p>
-      <div class="row">
-        <input id="empId" type="text" inputmode="numeric" placeholder="Enter Employee ID / Mobile Number">
-        <button onclick="fetchDetails()">Fetch</button>
-      </div>
+     <div class="row">
+  <input id="empId" type="text" inputmode="numeric" placeholder="Enter Employee ID or Mobile">
+</div>
 
       <div id="msg" class="spacer"></div>
 
@@ -75,9 +74,7 @@ SETUP:
   </div>
 
 <script>
-  // 1) PASTE YOUR APPS SCRIPT URL HERE (must end with /exec)
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec';
-
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec'; // keep as is if already set
   function setMsg(text, ok){
     const el = document.getElementById('msg');
     if(!text){ el.className='spacer'; el.textContent=''; return; }
@@ -91,9 +88,11 @@ SETUP:
     document.getElementById('empDept').textContent = emp.department || '—';
     document.getElementById('empEmail').textContent = emp.email || '—';
     document.getElementById('empIdDisplay').textContent = emp.id || '—';
+
     const pill = document.getElementById('empStatus');
     const s = (emp.status || 'Not Marked').toUpperCase();
-    pill.textContent = s; pill.className = 'pill ' + (s==='IN' ? 'in' : 'out');
+    pill.textContent = s;
+    pill.className = 'pill ' + (s === 'IN' ? 'in' : 'out');
   }
 
   function resetUI(){
@@ -103,38 +102,45 @@ SETUP:
     document.getElementById('empId').focus();
   }
 
-  async function fetchJSON(url){
-    const res = await fetch(url, { method:'GET' });
-    return res.json();
-  }
-
-  async function fetchDetails(){
-    const id = (document.getElementById('empId').value || '').trim();
-    if(!id){ setMsg('Please enter an Employee ID/Mobile Number.', false); return; }
-    setMsg('', true);
-    try{
-      const data = await fetchJSON(`${API_BASE}?action=lookup&id=${encodeURIComponent(id)}`);
-      if(!data || data.ok !== true){ setMsg((data && data.error) || 'Lookup failed.', false); return; }
-      paint(data.employee);
-      refreshSummary();
-    }catch(e){ setMsg('Lookup failed.', false); }
-  }
-
   async function doCheck(kind){
     const id = (document.getElementById('empId').value || '').trim();
-    if(!id) return;
-    try{
-      const data = await fetchJSON(`${API_BASE}?action=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`);
-      if(!data || data.ok !== true){ setMsg((data && data.error) || 'Update failed.', false); return; }
-      setMsg(kind==='checkin' ? 'Checked in successfully.' : 'Checked out successfully.', true);
-      paint(data.employee);
+    if(!id){
+      setMsg('Please enter Employee ID or Mobile.', false);
+      return;
+    }
+    setMsg('', true);
+
+    try {
+      const url = `${API_BASE}?action=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if(!data || data.ok !== true){
+        setMsg((data && data.error) || 'Update failed.', false);
+        return;
+      }
+
+      // message
+      if (data.already) {
+        setMsg(data.message || (kind === 'checkin' ? 'Already checked in.' : 'Not currently checked in.'), true);
+      } else {
+        setMsg(kind === 'checkin' ? 'Checked in successfully.' : 'Checked out successfully.', true);
+      }
+
+      // show employee details
+      if (data.employee) paint(data.employee);
+
+      // refresh summary
       refreshSummary();
-    }catch(e){ setMsg('Update failed.', false); }
+    } catch(e) {
+      setMsg('Update failed.', false);
+    }
   }
 
   async function refreshSummary(){
     try{
-      const data = await fetchJSON(`${API_BASE}?action=summary`);
+      const res = await fetch(`${API_BASE}?action=summary`);
+      const data = await res.json();
       if(data && data.ok){
         document.getElementById('summary').textContent =
           `Summary — Total: ${data.total} • IN: ${data.inCount} • OUT: ${data.outCount}`;
@@ -147,5 +153,6 @@ SETUP:
     refreshSummary();
   });
 </script>
+
 </body>
 </html>
