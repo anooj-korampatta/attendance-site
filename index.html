@@ -1,10 +1,3 @@
-<!--
-SETUP:
-1) Replace API_BASE with your Apps Script Web App URL (ending with /exec)
-2) Commit this file
-3) Enable GitHub Pages (Step 3 below)
-4) Author: Anooj Korampatta
--->
 <!doctype html>
 <html>
 <head>
@@ -40,7 +33,7 @@ SETUP:
       background:var(--card);
       border-radius:20px;
       box-shadow:0 18px 40px rgba(15,23,42,0.12);
-      padding:24px 22px 20px;
+      padding:24px 22px 24px;
       position:relative;
       overflow:hidden;
     }
@@ -49,6 +42,7 @@ SETUP:
       font-size:22px;
       font-weight:700;
       text-align:center;
+      color:#111827;
     }
     .subtitle{
       margin:6px 0 20px;
@@ -148,24 +142,19 @@ SETUP:
       font-size:11px;
       color:#9ca3af;
     }
-    .hidden{display:none;}
 
-    /* Loader */
-    .loading-wrapper{
-      position:absolute;
-      inset:auto 16px 16px 16px;
-      pointer-events:none;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+    /* Loader pill */
     .loading{
+      position:absolute;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
       display:flex;
       align-items:center;
       gap:8px;
-      padding:6px 10px;
+      padding:6px 12px;
       border-radius:999px;
-      background:rgba(255,255,255,0.9);
+      background:rgba(255,255,255,0.95);
       box-shadow:0 6px 16px rgba(15,23,42,0.18);
       font-size:13px;
       color:var(--muted);
@@ -181,6 +170,8 @@ SETUP:
     @keyframes spin{
       to{transform:rotate(360deg);}
     }
+
+    .hidden{display:none !important;}
   </style>
 </head>
 <body>
@@ -201,12 +192,10 @@ SETUP:
 
       <div id="summary" class="summary"></div>
 
-      <!-- Loader -->
-      <div class="loading-wrapper">
-        <div id="loader" class="loading hidden">
-          <div class="loading-icon"></div>
-          <div>Processing...</div>
-        </div>
+      <!-- Loader pill -->
+      <div id="loader" class="loading hidden">
+        <div class="loading-icon"></div>
+        <div>Processing...</div>
       </div>
     </div>
     <div class="footer">©Anooj Korampatta | GWC Townhall</div>
@@ -269,6 +258,7 @@ SETUP:
     setHi('', '');
     document.getElementById('btnOut').classList.add('hidden');
     document.getElementById('btnBack').classList.add('hidden');
+    setLoading(false);
   }
 
   async function callAPI(action, key) {
@@ -363,17 +353,14 @@ SETUP:
           `Checked in: ${data.inCount} / ${data.total} invitees`;
       }
     } catch (e) {
-      // summary is non-critical, so ignore errors silently
+      // ignore errors; summary is not critical
     }
   }
 
   window.addEventListener('load', () => {
-    document.getElementById('keyInput').focus();
-    refreshSummary();
+    resetForm();      // ensures loader is hidden & input focused
+    refreshSummary(); // initial numbers
   });
 </script>
 </body>
 </html>
-
-
-
