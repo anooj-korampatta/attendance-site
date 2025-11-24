@@ -12,142 +12,293 @@ SETUP:
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Townhall Check-In</title>
   <style>
-    :root { --ink:#0f172a; --muted:#64748b; --bg:#f6f7fb; --card:#fff; }
-    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    .wrap{max-width:480px;margin:40px auto;padding:0 16px}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 10px 25px rgba(2,8,20,.06);padding:24px}
-    h1{margin:0 0 6px;font-size:22px;text-align:center}
-    p.muted{text-align:center;margin:6px 0 20px;color:var(--muted)}
-    input[type=tel]{width:100%;padding:14px;border-radius:12px;border:1px solid #e2e8f0;font-size:18px;margin-bottom:10px}
-    input[type=tel]:focus{border-color:#3b82f6}
-    button{padding:14px;border:0;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;width:100%;margin-top:10px;background:#0ea5e9;color:#fff}
-    button.ok{background:#10b981}
-    button.warn{background:#f59e0b}
-    .msg{margin-top:10px;padding:12px;border-radius:10px;font-size:15px;display:none}
-    .msg.ok{background:#ecfeff;color:#155e75;display:block}
-    .msg.err{background:#fee2e2;color:#7f1d1d;display:block}
-    .hiBox{text-align:center;font-size:20px;margin-top:20px;font-weight:600}
-    .footer{text-align:center;margin-top:25px;color:#94a3b8;font-size:12px}
-    .hide{display:none}
+    :root {
+      --primary:#40ae49;       /* brand green */
+      --primary-dark:#2f8a36;
+      --bg:#f4f5f7;            /* light grey */
+      --card:#ffffff;
+      --text:#111111;          /* black-ish */
+      --muted:#6b7280;         /* grey text */
+      --error-bg:#fee2e2;
+      --error-text:#7f1d1d;
+      --ok-bg:#e0f7e3;
+      --ok-text:#065f46;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:radial-gradient(circle at top,#ffffff,#f4f5f7);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:420px;
+      margin:40px auto;
+      padding:0 16px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 18px 40px rgba(15,23,42,0.12);
+      padding:24px 22px 20px;
+    }
+    h1{
+      margin:0;
+      font-size:22px;
+      font-weight:700;
+      text-align:center;
+    }
+    .subtitle{
+      margin:6px 0 20px;
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .field-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    input[type=text]{
+      width:100%;
+      padding:14px 14px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      font-size:16px;
+      outline:none;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    input[type=text]:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 2px rgba(64,174,73,0.16);
+    }
+    .btn{
+      width:100%;
+      border:0;
+      border-radius:999px;
+      padding:12px 16px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      margin-top:12px;
+      transition:transform .06s ease-out, box-shadow .06s ease-out, background .12s;
+    }
+    .btn-primary{
+      background:var(--primary);
+      color:#ffffff;
+      box-shadow:0 8px 18px rgba(64,174,73,0.35);
+    }
+    .btn-primary:active{
+      transform:translateY(1px);
+      box-shadow:0 3px 8px rgba(64,174,73,0.35);
+      background:var(--primary-dark);
+    }
+    .btn-outline{
+      background:#f3f4f6;
+      color:#111827;
+      box-shadow:none;
+    }
+    .btn-outline:active{
+      background:#e5e7eb;
+      transform:translateY(1px);
+    }
+    .btn-text{
+      background:transparent;
+      color:var(--muted);
+      font-size:14px;
+      box-shadow:none;
+      padding:8px 4px;
+      margin-top:8px;
+    }
+    .btn-text:active{
+      color:#374151;
+    }
+    .msg{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:14px;
+      display:none;
+    }
+    .msg.ok{background:var(--ok-bg);color:var(--ok-text);display:block;}
+    .msg.err{background:var(--error-bg);color:var(--error-text);display:block;}
+    .hi{
+      margin-top:16px;
+      text-align:center;
+      font-size:18px;
+      font-weight:600;
+    }
+    .summary{
+      margin-top:16px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .footer{
+      text-align:center;
+      margin-top:14px;
+      font-size:11px;
+      color:#9ca3af;
+    }
+    .hidden{display:none;}
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <div class="card">
       <h1>Townhall Attendance</h1>
-      <p class="muted">Enter your mobile number</p>
+      <p class="subtitle">On-site check-in for invitees</p>
 
-      <input id="empId" type="tel" inputmode="numeric" placeholder="Mobile number">
+      <div class="field-label">Employee ID or Mobile (without country code)</div>
+      <input id="keyInput" type="text" placeholder="e.g. 11104 or 33591326">
 
-      <button onclick="fetchDetails()">Fetch</button>
+      <button class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
+      <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
+      <button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
 
-      <div id="msg"></div>
+      <div id="msgBox" class="msg"></div>
+      <div id="hiBox" class="hi hidden"></div>
 
-      <!-- Simple greeting -->
-      <div id="hiBox" class="hiBox hide"></div>
-
-      <!-- Buttons -->
-      <button id="btnIn"  class="ok hide"  onclick="doCheck('checkin')">Check In</button>
-      <button id="btnOut" class="warn hide" onclick="doCheck('checkout')">Check Out</button>
-
-      <div id="summary" class="muted" style="margin-top:20px;text-align:center"></div>
+      <div id="summary" class="summary"></div>
     </div>
-    <div class="footer">Powered by Google Sheets</div>
+    <div class="footer">Powered by Google Sheets · GWC Townhall</div>
   </div>
 
-
 <script>
-  // <<< REPLACE WITH YOUR EXEC URL >>>
-  const API_BASE = "YOUR_GAS_EXEC_URL_HERE";
+  // TODO: paste your Apps Script Web App URL here (must end with /exec)
+  const API_BASE = "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
 
-  function showMsg(text, ok){
-    const m = document.getElementById("msg");
-    if(!text){ m.style.display='none'; return; }
-    m.className = ok ? "msg ok" : "msg err";
-    m.textContent = text;
-    m.style.display = "block";
+  let currentEmployee = null;
+
+  function setMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    if (!text) {
+      box.style.display = 'none';
+      return;
+    }
+    box.textContent = text;
+    box.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
   }
 
-  function resetUI(){
-    showMsg('', true);
-    document.getElementById("hiBox").classList.add("hide");
-    document.getElementById("btnIn").classList.add("hide");
-    document.getElementById("btnOut").classList.add("hide");
+  function setHi(name, statusText) {
+    const hi = document.getElementById('hiBox');
+    if (!name) {
+      hi.classList.add('hidden');
+      hi.textContent = '';
+      return;
+    }
+    hi.textContent = `Hi ${name}, ${statusText}`;
+    hi.classList.remove('hidden');
   }
 
-  function paint(emp){
-    // Simple greeting
-    const hi = document.getElementById("hiBox");
-    hi.textContent = `Hi ${emp.name} 👋 Please continue`;
-    hi.classList.remove("hide");
-
-    // Show buttons
-    document.getElementById("btnIn").classList.remove("hide");
-    document.getElementById("btnOut").classList.remove("hide");
+  function resetForm() {
+    currentEmployee = null;
+    document.getElementById('keyInput').value = '';
+    document.getElementById('keyInput').focus();
+    setMsg('', 'ok');
+    setHi('', '');
+    document.getElementById('btnOut').classList.add('hidden');
+    document.getElementById('btnBack').classList.add('hidden');
   }
 
-  async function fetchJSON(url){
+  async function callAPI(action, key) {
+    const url = `${API_BASE}?action=${encodeURIComponent(action)}&id=${encodeURIComponent(key)}`;
     const res = await fetch(url);
     return res.json();
   }
 
-  async function fetchDetails(){
-    resetUI();
-    const id = document.getElementById("empId").value.trim();
-    if(!id){ return showMsg("Please enter mobile number", false); }
-
-    try{
-      const data = await fetchJSON(`${API_BASE}?action=lookup&id=${encodeURIComponent(id)}`);
-      if(!data.ok) return showMsg(data.error || "Lookup failed", false);
-
-      paint(data.employee);
-      showMsg('', true);
-      refreshSummary();
-
-    }catch(e){
-      showMsg("Lookup failed.", false);
+  async function handleCheckIn() {
+    const key = document.getElementById('keyInput').value.trim();
+    if (!key) {
+      setMsg('Please enter your Employee ID or mobile number.', 'err');
+      return;
     }
-  }
+    setMsg('', 'ok');
+    setHi('', '');
+    document.getElementById('btnOut').classList.add('hidden');
+    document.getElementById('btnBack').classList.add('hidden');
 
-  async function doCheck(kind){
-    const id = document.getElementById("empId").value.trim();
-    if(!id){ return showMsg("Enter mobile number", false); }
+    try {
+      const data = await callAPI('checkin', key);
+      if (!data.ok) {
+        setMsg(data.error || 'Check-in failed.', 'err');
+        return;
+      }
 
-    try{
-      const data = await fetchJSON(`${API_BASE}?action=${kind}&id=${encodeURIComponent(id)}`);
-      if(!data.ok) return showMsg(data.error || "Failed", false);
+      currentEmployee = data.employee || null;
+      const name = currentEmployee ? currentEmployee.name : 'Guest';
 
-      if(data.already){
-        showMsg(data.message, true);
+      if (data.already) {
+        // already IN
+        setHi(name, 'you are already checked in.');
+        setMsg('You are already checked in. You can check out below if you are leaving.', 'ok');
+        document.getElementById('btnOut').classList.remove('hidden');
       } else {
-        showMsg(kind === "checkin" ? "Checked In!" : "Checked Out!", true);
+        // fresh IN
+        setHi(name, 'your check-in has been registered ✅');
+        setMsg('Welcome! Your check-in has been registered.', 'ok');
+        // show Check Out as well in case they immediately need it
+        document.getElementById('btnOut').classList.remove('hidden');
       }
 
-      if(data.employee) paint(data.employee);
+      document.getElementById('btnBack').classList.remove('hidden');
       refreshSummary();
-
-    }catch(e){
-      showMsg("Failed.", false);
+    } catch (e) {
+      setMsg('Check-in failed. Please try again.', 'err');
     }
   }
 
-  async function refreshSummary(){
-    try{
-      const d = await fetchJSON(`${API_BASE}?action=summary`);
-      if(d.ok){
-        document.getElementById("summary").textContent =
-          `Total: ${d.total} | IN: ${d.inCount} | OUT: ${d.outCount}`;
+  async function handleCheckOut() {
+    const key = document.getElementById('keyInput').value.trim();
+    if (!key) {
+      setMsg('Please enter your Employee ID or mobile number.', 'err');
+      return;
+    }
+    setMsg('', 'ok');
+
+    try {
+      const data = await callAPI('checkout', key);
+      if (!data.ok) {
+        setMsg(data.error || 'Check-out failed.', 'err');
+        return;
       }
-    }catch(e){}
+
+      currentEmployee = data.employee || null;
+      const name = currentEmployee ? currentEmployee.name : 'Guest';
+
+      if (data.already) {
+        setHi(name, 'you are not currently checked in.');
+        setMsg(data.message || 'You are not currently checked in.', 'err');
+      } else {
+        setHi(name, 'your check-out has been registered ✅');
+        setMsg('Your check-out has been registered. Thank you.', 'ok');
+      }
+      document.getElementById('btnBack').classList.remove('hidden');
+      refreshSummary();
+    } catch (e) {
+      setMsg('Check-out failed. Please try again.', 'err');
+    }
   }
 
-  window.onload = () => {
-    document.getElementById("empId").focus();
-    refreshSummary();
-  };
-</script>
+  async function refreshSummary() {
+    try {
+      const res = await fetch(`${API_BASE}?action=summary`);
+      const data = await res.json();
+      if (data && data.ok) {
+        document.getElementById('summary').textContent =
+          `Checked in: ${data.inCount} / ${data.total} invitees`;
+      }
+    } catch (e) {
+      // ignore; summary is not critical
+    }
+  }
 
+  window.addEventListener('load', () => {
+    document.getElementById('keyInput').focus();
+    refreshSummary();
+  });
+</script>
 </body>
 </html>
+
 
