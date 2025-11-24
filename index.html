@@ -41,6 +41,8 @@ SETUP:
       border-radius:20px;
       box-shadow:0 18px 40px rgba(15,23,42,0.12);
       padding:24px 22px 20px;
+      position:relative;
+      overflow:hidden;
     }
     h1{
       margin:0;
@@ -81,7 +83,7 @@ SETUP:
       font-weight:600;
       cursor:pointer;
       margin-top:12px;
-      transition:transform .06s ease-out, box-shadow .06s ease-out, background .12s;
+      transition:transform .06s ease-out, box-shadow .06s ease-out, background .12s, opacity .1s;
     }
     .btn-primary{
       background:var(--primary);
@@ -113,6 +115,12 @@ SETUP:
     .btn-text:active{
       color:#374151;
     }
+    button:disabled{
+      opacity:0.6;
+      cursor:default;
+      box-shadow:none;
+      transform:none;
+    }
     .msg{
       margin-top:12px;
       padding:10px 12px;
@@ -141,6 +149,38 @@ SETUP:
       color:#9ca3af;
     }
     .hidden{display:none;}
+
+    /* Loader */
+    .loading-wrapper{
+      position:absolute;
+      inset:auto 16px 16px 16px;
+      pointer-events:none;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .loading{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.9);
+      box-shadow:0 6px 16px rgba(15,23,42,0.18);
+      font-size:13px;
+      color:var(--muted);
+    }
+    .loading-icon{
+      width:18px;
+      height:18px;
+      border-radius:999px;
+      border:3px solid #d1fae5;
+      border-top-color:var(--primary);
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{
+      to{transform:rotate(360deg);}
+    }
   </style>
 </head>
 <body>
@@ -152,7 +192,7 @@ SETUP:
       <div class="field-label">Employee ID or Mobile (without country code)</div>
       <input id="keyInput" type="text" placeholder="e.g. 11104 or 33591326">
 
-      <button class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
+      <button id="btnIn"  class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
       <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
       <button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
 
@@ -160,12 +200,20 @@ SETUP:
       <div id="hiBox" class="hi hidden"></div>
 
       <div id="summary" class="summary"></div>
+
+      <!-- Loader -->
+      <div class="loading-wrapper">
+        <div id="loader" class="loading hidden">
+          <div class="loading-icon"></div>
+          <div>Processing...</div>
+        </div>
+      </div>
     </div>
-    <div class="footer">Powered by Google Sheets · GWC Townhall</div>
+    <div class="footer">©Anooj Korampatta | GWC Townhall</div>
   </div>
 
 <script>
-  // TODO: paste your Apps Script Web App URL here (must end with /exec)
+  // 🔗 Put your Apps Script Web App URL here (ending with /exec)
   const API_BASE = "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
 
   let currentEmployee = null;
@@ -191,6 +239,28 @@ SETUP:
     hi.classList.remove('hidden');
   }
 
+  function setLoading(on) {
+    const loader = document.getElementById('loader');
+    const input  = document.getElementById('keyInput');
+    const btnIn  = document.getElementById('btnIn');
+    const btnOut = document.getElementById('btnOut');
+    const btnBack= document.getElementById('btnBack');
+
+    if (on) {
+      loader.classList.remove('hidden');
+      input.disabled = true;
+      btnIn.disabled = true;
+      btnOut.disabled = true;
+      btnBack.disabled = true;
+    } else {
+      loader.classList.add('hidden');
+      input.disabled = false;
+      btnIn.disabled = false;
+      btnOut.disabled = false;
+      btnBack.disabled = false;
+    }
+  }
+
   function resetForm() {
     currentEmployee = null;
     document.getElementById('keyInput').value = '';
@@ -202,8 +272,8 @@ SETUP:
   }
 
   async function callAPI(action, key) {
-    const url = `${API_BASE}?action=${encodeURIComponent(action)}&id=${encodeURIComponent(key)}`;
-    const res = await fetch(url);
+    const url = `${API_BASE}?action=${encodeURIComponent(action)}&id=${encodeURIComponent(key)}&t=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
     return res.json();
   }
 
@@ -218,6 +288,7 @@ SETUP:
     document.getElementById('btnOut').classList.add('hidden');
     document.getElementById('btnBack').classList.add('hidden');
 
+    setLoading(true);
     try {
       const data = await callAPI('checkin', key);
       if (!data.ok) {
@@ -229,15 +300,12 @@ SETUP:
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        // already IN
         setHi(name, 'you are already checked in.');
         setMsg('You are already checked in. You can check out below if you are leaving.', 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       } else {
-        // fresh IN
         setHi(name, 'your check-in has been registered ✅');
         setMsg('Welcome! Your check-in has been registered.', 'ok');
-        // show Check Out as well in case they immediately need it
         document.getElementById('btnOut').classList.remove('hidden');
       }
 
@@ -245,6 +313,8 @@ SETUP:
       refreshSummary();
     } catch (e) {
       setMsg('Check-in failed. Please try again.', 'err');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -256,6 +326,7 @@ SETUP:
     }
     setMsg('', 'ok');
 
+    setLoading(true);
     try {
       const data = await callAPI('checkout', key);
       if (!data.ok) {
@@ -277,19 +348,22 @@ SETUP:
       refreshSummary();
     } catch (e) {
       setMsg('Check-out failed. Please try again.', 'err');
+    } finally {
+      setLoading(false);
     }
   }
 
   async function refreshSummary() {
     try {
-      const res = await fetch(`${API_BASE}?action=summary`);
+      const url = `${API_BASE}?action=summary&t=${Date.now()}`;
+      const res = await fetch(url, { cache: 'no-store' });
       const data = await res.json();
       if (data && data.ok) {
         document.getElementById('summary').textContent =
           `Checked in: ${data.inCount} / ${data.total} invitees`;
       }
     } catch (e) {
-      // ignore; summary is not critical
+      // summary is non-critical, so ignore errors silently
     }
   }
 
@@ -300,5 +374,6 @@ SETUP:
 </script>
 </body>
 </html>
+
 
 
