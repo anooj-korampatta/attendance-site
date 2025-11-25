@@ -300,10 +300,10 @@ Author: Anooj Korampatta
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        setMsg(`Hi <strong>${name}</strong>,you are already checked in. You can check out if you are leaving.`, 'ok');
+        setMsg(`Hi <strong>${name}</strong>, you are already checked in. You can check out if you are leaving.`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       } else {
-        setMsg(`Hi <strong>${name}</strong>,your check-in has been registered ✅`, 'ok');
+        setMsg(`Hi <strong>${name}</strong>, your check-in has been registered ✅`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       }
 
@@ -349,9 +349,9 @@ Author: Anooj Korampatta
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        setMsg(`Hi <strong>${name}</strong>,you are not currently checked in.`, 'err');
+        setMsg(`Hi <strong>${name}</strong>, you are not currently checked in.`, 'err');
       } else {
-        setMsg(`Hi <strong>${name}</strong>,your check-out has been registered ✅`, 'ok');
+        setMsg(`Hi <strong>${name}</strong>, your check-out has been registered ✅`, 'ok');
       }
 
       document.getElementById('btnBack').classList.remove('hidden');
