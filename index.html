@@ -1,3 +1,6 @@
+<!--Attendance Check in App
+Author: Anooj Korampatta
+-->
 <!doctype html>
 <html>
 <head>
@@ -202,8 +205,8 @@
   </div>
 
 <script>
-  // 🔗 Put your Apps Script Web App URL here (ending with /exec)
-  const API_BASE = "https://script.google.com/macros/s/AKfycbyzzbZaIcvg3FAvXiVxeQgddzcXapWIraeXnRgSiHAb2l3qxDmIqIf-PwvSZbTsJ14JKw/exec";
+  // 🔗 Your Apps Script Web App URL
+  const API_BASE = "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
 
   let currentEmployee = null;
 
@@ -282,7 +285,13 @@
     try {
       const data = await callAPI('checkin', key);
       if (!data.ok) {
-        setMsg(data.error || 'Check-in failed.', 'err');
+        let msg;
+        if (data.error && data.error.indexOf('No matching invitee') !== -1) {
+          msg = 'You are not in the invitee list for this townhall.';
+        } else {
+          msg = data.error || 'Check-in failed.';
+        }
+        setMsg(msg, 'err');
         return;
       }
 
@@ -320,7 +329,13 @@
     try {
       const data = await callAPI('checkout', key);
       if (!data.ok) {
-        setMsg(data.error || 'Check-out failed.', 'err');
+        let msg;
+        if (data.error && data.error.indexOf('No matching invitee') !== -1) {
+          msg = 'You are not in the invitee list for this townhall.';
+        } else {
+          msg = data.error || 'Check-out failed.';
+        }
+        setMsg(msg, 'err');
         return;
       }
 
