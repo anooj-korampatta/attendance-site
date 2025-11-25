@@ -288,10 +288,10 @@ Author: Anooj Korampatta
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        setMsg(`Hi ${name}, you are already checked in. You can check out below if you are leaving.`, 'ok');
+        setMsg(`Hi <strong>${name}</strong>,you are already checked in. You can check out below if you are leaving.`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       } else {
-        setMsg(`Hi ${name}, your check-in has been registered ✅`, 'ok');
+        setMsg(`Hi <strong>${name}</strong>,your check-in has been registered ✅`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       }
 
