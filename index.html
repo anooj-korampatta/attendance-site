@@ -178,7 +178,9 @@ Author: Anooj Korampatta
       <p class="subtitle">On-site check-in for invitees</p>
 
       <div class="field-label">Employee ID or Mobile (without country code)</div>
-      <input id="keyInput" type="text" placeholder="e.g. 11104 or 33591326">
+      <input id="keyInput" type="tel" inputmode="numeric" pattern="[0-9]*"
+       oninput="this.value = this.value.replace(/[^0-9]/g,'');"
+       placeholder="e.g. 11104 or 33591326">
 
       <button id="btnIn"  class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
       <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
