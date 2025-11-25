@@ -119,20 +119,14 @@ Author: Anooj Korampatta
       transform:none;
     }
     .msg{
-      margin-top:12px;
-      padding:10px 12px;
-      border-radius:10px;
-      font-size:14px;
+      margin-top:16px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:15px;
       display:none;
     }
     .msg.ok{background:var(--ok-bg);color:var(--ok-text);display:block;}
     .msg.err{background:var(--error-bg);color:var(--error-text);display:block;}
-    .hi{
-      margin-top:16px;
-      text-align:center;
-      font-size:18px;
-      font-weight:600;
-    }
     .summary{
       margin-top:16px;
       text-align:center;
@@ -190,8 +184,8 @@ Author: Anooj Korampatta
       <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
       <button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
 
+      <!-- SINGLE message area -->
       <div id="msgBox" class="msg"></div>
-      <div id="hiBox" class="hi hidden"></div>
 
       <div id="summary" class="summary"></div>
 
@@ -206,7 +200,7 @@ Author: Anooj Korampatta
 
 <script>
   // 🔗 Your Apps Script Web App URL
-  const API_BASE = "https://script.google.com/macros/s/AKfycbyzzbZaIcvg3FAvXiVxeQgddzcXapWIraeXnRgSiHAb2l3qxDmIqIf-PwvSZbTsJ14JKw/exec";
+  const API_BASE = "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
 
   let currentEmployee = null;
 
@@ -214,22 +208,12 @@ Author: Anooj Korampatta
     const box = document.getElementById('msgBox');
     if (!text) {
       box.style.display = 'none';
+      box.textContent = '';
       return;
     }
     box.textContent = text;
     box.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
     box.style.display = 'block';
-  }
-
-  function setHi(name, statusText) {
-    const hi = document.getElementById('hiBox');
-    if (!name) {
-      hi.classList.add('hidden');
-      hi.textContent = '';
-      return;
-    }
-    hi.textContent = `Hi ${name}, ${statusText}`;
-    hi.classList.remove('hidden');
   }
 
   function setLoading(on) {
@@ -258,7 +242,6 @@ Author: Anooj Korampatta
     currentEmployee = null;
     document.getElementById('keyInput').value = '';
     setMsg('', 'ok');
-    setHi('', '');
     document.getElementById('btnOut').classList.add('hidden');
     document.getElementById('btnBack').classList.add('hidden');
     setLoading(false);
@@ -274,15 +257,12 @@ Author: Anooj Korampatta
   async function handleCheckIn() {
     const key = document.getElementById('keyInput').value.trim();
 
-    // 🔴 Front-end validation: empty input
     if (!key) {
-      setHi('', '');
       setMsg('Please enter your Employee ID or mobile number.', 'err');
       return;
     }
 
     setMsg('', 'ok');
-    setHi('', '');
     document.getElementById('btnOut').classList.add('hidden');
     document.getElementById('btnBack').classList.add('hidden');
 
@@ -290,7 +270,6 @@ Author: Anooj Korampatta
     try {
       const data = await callAPI('checkin', key);
 
-      // If backend says "no invitee", show friendly message
       if (!data || data.ok !== true) {
         const err = data && data.error ? data.error : '';
         let msg;
@@ -299,7 +278,6 @@ Author: Anooj Korampatta
         } else {
           msg = err || 'Check-in failed. Please try again.';
         }
-        setHi('', '');
         setMsg(msg, 'err');
         return;
       }
@@ -308,19 +286,16 @@ Author: Anooj Korampatta
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        setHi(name, 'you are already checked in.');
-        setMsg('You are already checked in. You can check out below if you are leaving.', 'ok');
+        setMsg(`Hi ${name}, you are already checked in. You can check out below if you are leaving.`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       } else {
-        setHi(name, 'your check-in has been registered ✅');
-        setMsg('Welcome! Your check-in has been registered.', 'ok');
+        setMsg(`Hi ${name}, your check-in has been registered ✅`, 'ok');
         document.getElementById('btnOut').classList.remove('hidden');
       }
 
       document.getElementById('btnBack').classList.remove('hidden');
       refreshSummary();
     } catch (e) {
-      setHi('', '');
       setMsg('Check-in failed. Please try again.', 'err');
     } finally {
       setLoading(false);
@@ -331,13 +306,11 @@ Author: Anooj Korampatta
     const key = document.getElementById('keyInput').value.trim();
 
     if (!key) {
-      setHi('', '');
       setMsg('Please enter your Employee ID or mobile number.', 'err');
       return;
     }
 
     setMsg('', 'ok');
-
     setLoading(true);
     try {
       const data = await callAPI('checkout', key);
@@ -350,7 +323,6 @@ Author: Anooj Korampatta
         } else {
           msg = err || 'Check-out failed. Please try again.';
         }
-        setHi('', '');
         setMsg(msg, 'err');
         return;
       }
@@ -359,16 +331,14 @@ Author: Anooj Korampatta
       const name = currentEmployee ? currentEmployee.name : 'Guest';
 
       if (data.already) {
-        setHi(name, 'you are not currently checked in.');
-        setMsg(data.message || 'You are not currently checked in.', 'err');
+        setMsg(`Hi ${name}, you are not currently checked in.`, 'err');
       } else {
-        setHi(name, 'your check-out has been registered ✅');
-        setMsg('Your check-out has been registered. Thank you.', 'ok');
+        setMsg(`Hi ${name}, your check-out has been registered ✅`, 'ok');
       }
+
       document.getElementById('btnBack').classList.remove('hidden');
       refreshSummary();
     } catch (e) {
-      setHi('', '');
       setMsg('Check-out failed. Please try again.', 'err');
     } finally {
       setLoading(false);
@@ -390,11 +360,12 @@ Author: Anooj Korampatta
   }
 
   window.addEventListener('load', () => {
-    resetForm();      // hides loader & focuses input
-    refreshSummary(); // initial numbers
+    resetForm();
+    refreshSummary();
   });
 </script>
 </body>
 </html>
+
 
 
