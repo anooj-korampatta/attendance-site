@@ -284,13 +284,16 @@ Author: Anooj Korampatta
     setLoading(true);
     try {
       const data = await callAPI('checkin', key);
-      if (!data.ok) {
+
+      if (!data || data.ok !== true) {
+        const err = data && data.error ? data.error : '';
         let msg;
-        if (data.error && data.error.indexOf('No matching invitee') !== -1) {
+        if (err.includes('No matching invitee')) {
           msg = 'You are not in the invitee list for this townhall.';
         } else {
-          msg = data.error || 'Check-in failed.';
+          msg = err || 'Check-in failed. Please try again.';
         }
+        setHi('', '');
         setMsg(msg, 'err');
         return;
       }
@@ -311,6 +314,7 @@ Author: Anooj Korampatta
       document.getElementById('btnBack').classList.remove('hidden');
       refreshSummary();
     } catch (e) {
+      setHi('', '');
       setMsg('Check-in failed. Please try again.', 'err');
     } finally {
       setLoading(false);
@@ -328,13 +332,16 @@ Author: Anooj Korampatta
     setLoading(true);
     try {
       const data = await callAPI('checkout', key);
-      if (!data.ok) {
+
+      if (!data || data.ok !== true) {
+        const err = data && data.error ? data.error : '';
         let msg;
-        if (data.error && data.error.indexOf('No matching invitee') !== -1) {
+        if (err.includes('No matching invitee')) {
           msg = 'You are not in the invitee list for this townhall.';
         } else {
-          msg = data.error || 'Check-out failed.';
+          msg = err || 'Check-out failed. Please try again.';
         }
+        setHi('', '');
         setMsg(msg, 'err');
         return;
       }
@@ -352,6 +359,7 @@ Author: Anooj Korampatta
       document.getElementById('btnBack').classList.remove('hidden');
       refreshSummary();
     } catch (e) {
+      setHi('', '');
       setMsg('Check-out failed. Please try again.', 'err');
     } finally {
       setLoading(false);
@@ -368,7 +376,7 @@ Author: Anooj Korampatta
           `Checked in: ${data.inCount} / ${data.total} invitees`;
       }
     } catch (e) {
-      // ignore errors; summary is not critical
+      // ignore; summary is not critical
     }
   }
 
@@ -379,3 +387,4 @@ Author: Anooj Korampatta
 </script>
 </body>
 </html>
+
