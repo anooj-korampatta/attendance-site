@@ -201,7 +201,7 @@ Author: Anooj Korampatta
         <div>Processing...</div>
       </div>
     </div>
-    <div class="footer">©Anooj Korampatta | GWC Townhall</div>
+    <div class="footer">©2025 Anooj Korampatta | GWC Townhall</div>
   </div>
 
 <script>
@@ -218,6 +218,7 @@ Author: Anooj Korampatta
     }
     box.textContent = text;
     box.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+    box.style.display = 'block';
   }
 
   function setHi(name, statusText) {
@@ -256,12 +257,12 @@ Author: Anooj Korampatta
   function resetForm() {
     currentEmployee = null;
     document.getElementById('keyInput').value = '';
-    document.getElementById('keyInput').focus();
     setMsg('', 'ok');
     setHi('', '');
     document.getElementById('btnOut').classList.add('hidden');
     document.getElementById('btnBack').classList.add('hidden');
     setLoading(false);
+    document.getElementById('keyInput').focus();
   }
 
   async function callAPI(action, key) {
@@ -272,10 +273,14 @@ Author: Anooj Korampatta
 
   async function handleCheckIn() {
     const key = document.getElementById('keyInput').value.trim();
+
+    // 🔴 Front-end validation: empty input
     if (!key) {
+      setHi('', '');
       setMsg('Please enter your Employee ID or mobile number.', 'err');
       return;
     }
+
     setMsg('', 'ok');
     setHi('', '');
     document.getElementById('btnOut').classList.add('hidden');
@@ -285,6 +290,7 @@ Author: Anooj Korampatta
     try {
       const data = await callAPI('checkin', key);
 
+      // If backend says "no invitee", show friendly message
       if (!data || data.ok !== true) {
         const err = data && data.error ? data.error : '';
         let msg;
@@ -323,10 +329,13 @@ Author: Anooj Korampatta
 
   async function handleCheckOut() {
     const key = document.getElementById('keyInput').value.trim();
+
     if (!key) {
+      setHi('', '');
       setMsg('Please enter your Employee ID or mobile number.', 'err');
       return;
     }
+
     setMsg('', 'ok');
 
     setLoading(true);
@@ -381,10 +390,11 @@ Author: Anooj Korampatta
   }
 
   window.addEventListener('load', () => {
-    resetForm();      // ensures loader is hidden & input focused
+    resetForm();      // hides loader & focuses input
     refreshSummary(); // initial numbers
   });
 </script>
 </body>
 </html>
+
 
