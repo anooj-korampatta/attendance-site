@@ -128,20 +128,23 @@ Author: Anooj Korampatta
     }
 
     .loader{
-      position:absolute;
-      left:50%;
-      bottom:14px;
-      transform:translateX(-50%);
-      display:flex;
-      gap:8px;
-      align-items:center;
-      padding:6px 12px;
-      border-radius:999px;
-      background:#fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.15);
-      font-size:13px;
-      color:var(--muted);
-    }
+  display:none;               /* 🔒 HARD STOP */
+  position:absolute;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  gap:8px;
+  align-items:center;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+  font-size:13px;
+  color:var(--muted);
+}
+.loader.active{
+  display:flex;               /* 🔓 only when active */
+}
 
     .spinner{
       width:16px;
@@ -210,9 +213,14 @@ function setMsg(html,type){
 }
 
 function setLoading(on){
-  loader.classList.toggle('hidden', !on);
+  if(on){
+    loader.classList.add('active');
+  }else{
+    loader.classList.remove('active');
+  }
   keyInput.disabled = on;
 }
+
 
 function showCheckInOnly(){
   btnIn.classList.remove('hidden');
@@ -301,12 +309,13 @@ async function refreshSummary(){
 }
 
 window.onload = () => {
-  loader.classList.add('hidden');   // 🔒 FORCE hide loader
-  setLoading(false);                // 🔒 Reset all UI state
+  loader.classList.remove('active'); // 🔒 force hide
+  keyInput.disabled = false;
   showCheckInOnly();
   refreshSummary();
   keyInput.focus();
 };
+
 </script>
 </body>
 </html>
