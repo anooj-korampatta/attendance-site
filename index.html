@@ -190,12 +190,12 @@ Author: Anooj Korampatta
              oninput="this.value = this.value.replace(/[^0-9]/g,'');"
              placeholder="e.g. 11104 or 33591326">
 
-      <button id="btnIn"  class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
-      <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
-      <button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
+  <div id="msgBox" class="msg"></div>
 
-      <!-- SINGLE message area -->
-      <div id="msgBox" class="msg"></div>
+<button id="btnIn"  class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
+<button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
+<button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
+
 
       <div id="summary" class="summary"></div>
 
