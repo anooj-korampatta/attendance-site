@@ -210,7 +210,7 @@ function setMsg(html,type){
 }
 
 function setLoading(on){
-  loader.classList.toggle('hidden',!on);
+  loader.classList.toggle('hidden', !on);
   keyInput.disabled = on;
 }
 
@@ -300,7 +300,9 @@ async function refreshSummary(){
   }catch(e){}
 }
 
-window.onload=()=>{
+window.onload = () => {
+  loader.classList.add('hidden');   // 🔒 FORCE hide loader
+  setLoading(false);                // 🔒 Reset all UI state
   showCheckInOnly();
   refreshSummary();
   keyInput.focus();
