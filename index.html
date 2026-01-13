@@ -258,6 +258,25 @@ Author: Anooj Korampatta
     document.getElementById('keyInput').focus();
   }
 
+  function showCheckInOnly() {
+  btnIn.classList.remove('hidden');
+  btnOut.classList.add('hidden');
+  btnBack.classList.add('hidden');
+}
+
+function showAlreadyIn() {
+  btnIn.classList.add('hidden');
+  btnOut.classList.remove('hidden');
+  btnBack.classList.remove('hidden');
+}
+
+function showDone() {
+  btnIn.classList.add('hidden');
+  btnOut.classList.add('hidden');
+  btnBack.classList.remove('hidden');
+}
+
+
   async function callAPI(action, key) {
     const url = `${API_BASE}?action=${encodeURIComponent(action)}&id=${encodeURIComponent(key)}&t=${Date.now()}`;
     const res = await fetch(url, { cache: 'no-store' });
