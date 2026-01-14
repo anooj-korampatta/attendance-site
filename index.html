@@ -176,10 +176,15 @@ Author: Anooj Korampatta
     <!-- MESSAGE ALWAYS AT TOP -->
     <div id="msgBox" class="msg"></div>
 
-    <div class="label">Employee ID or Mobile (without country code)</div>
-    <input id="keyInput" type="tel" inputmode="numeric"
-           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-           placeholder="e.g. 11104 or 33591326">
+    <div id="inputWrap">
+  <div class="label">Employee ID or Mobile (without country code)</div>
+  <input id="keyInput"
+         type="tel"
+         inputmode="numeric"
+         oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+         placeholder="e.g. 11104 or 33591326">
+</div>
+
 
     <!-- BUTTONS -->
     <button id="btnIn" class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
@@ -219,6 +224,16 @@ function setLoading(on){
     loader.classList.remove('active');
   }
   keyInput.disabled = on;
+}
+
+  const inputWrap = document.getElementById('inputWrap');
+
+function showInput(){
+  inputWrap.style.display = 'block';
+}
+
+function hideInput(){
+  inputWrap.style.display = 'none';
 }
 
 
@@ -272,11 +287,14 @@ async function handleCheckIn(){
         'ok'
       );
       showAlreadyIn();
+      hideInput();
+
     }else{
       setMsg(
         `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
         'ok'
       );
+      hideInput();
       showDone();
     }
     refreshSummary();
@@ -293,6 +311,7 @@ async function handleCheckOut(){
       `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
       'ok'
     );
+    hideInput();
     showDone();
     refreshSummary();
   }finally{setLoading(false);}
@@ -312,9 +331,11 @@ window.onload = () => {
   loader.classList.remove('active'); // 🔒 force hide
   keyInput.disabled = false;
   showCheckInOnly();
+  showInput();
   refreshSummary();
   keyInput.focus();
 };
+
 
 </script>
 </body>
