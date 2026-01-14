@@ -295,17 +295,18 @@ async function handleCheckIn(){
 
     }else{
       setMsg(
-        `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
-        'ok'
-        localStorage.setItem(
+  `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
+  'ok'
+);
+
+localStorage.setItem(
   'townhallCheckin',
   JSON.stringify({
     key: key,
     name: name,
     checkedIn: true
   })
-
-      );
+);
       hideInput();
       
       showDone();
@@ -323,8 +324,8 @@ async function handleCheckOut(){
     setMsg(
       `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
       'ok'
-      localStorage.removeItem('townhallCheckin');
     );
+   localStorage.removeItem('townhallCheckin');
     hideInput();
     showDone();
     refreshSummary();
