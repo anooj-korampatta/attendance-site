@@ -226,7 +226,7 @@ function setLoading(on){
   keyInput.disabled = on;
 }
 
-  const inputWrap = document.getElementById('inputWrap');
+const inputWrap = document.getElementById('inputWrap');
 
 function showInput(){
   inputWrap.style.display = 'block';
@@ -256,9 +256,13 @@ function showDone(){
 }
 
 function resetForm(){
-  keyInput.value='';
-  msgBox.className='msg hidden';
-  showCheckInOnly();
+  keyInput.value = '';
+  msgBox.className = 'msg hidden';
+
+  showInput();          // ✅ RESTORE TEXTBOX
+  showCheckInOnly();    // ✅ Restore initial buttons
+
+  keyInput.disabled = false;
   keyInput.focus();
 }
 
