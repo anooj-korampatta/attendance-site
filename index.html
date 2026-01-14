@@ -297,8 +297,17 @@ async function handleCheckIn(){
       setMsg(
         `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
         'ok'
+        localStorage.setItem(
+  'townhallCheckin',
+  JSON.stringify({
+    key: key,
+    name: name,
+    checkedIn: true
+  })
+
       );
       hideInput();
+      
       showDone();
     }
     refreshSummary();
@@ -314,6 +323,7 @@ async function handleCheckOut(){
     setMsg(
       `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
       'ok'
+      localStorage.removeItem('townhallCheckin');
     );
     hideInput();
     showDone();
@@ -331,12 +341,30 @@ async function refreshSummary(){
   }catch(e){}
 }
 
+function autoDetectPreviousCheckin(){
+  const saved = localStorage.getItem('townhallCheckin');
+  if(!saved) return;
+
+  const data = JSON.parse(saved);
+  if(!data.checkedIn) return;
+
+  setMsg(
+    `Hi <strong>${data.name}</strong>, you are already checked in.<br>
+     If you are leaving, please check out below.`,
+    'ok'
+  );
+
+  hideInput();
+  showAlreadyIn();
+}
+
 window.onload = () => {
   loader.classList.remove('active'); // 🔒 force hide
   keyInput.disabled = false;
   showCheckInOnly();
   showInput();
   refreshSummary();
+  autoDetectPreviousCheckin(); // 👈 NEW
   keyInput.focus();
 };
 
