@@ -211,6 +211,8 @@ const btnIn    = document.getElementById('btnIn');
 const btnOut   = document.getElementById('btnOut');
 const btnBack  = document.getElementById('btnBack');
 const loader   = document.getElementById('loader');
+const summary  = document.getElementById('summary');
+const inputWrap = document.getElementById('inputWrap');
 
 function setMsg(html,type){
   msgBox.innerHTML = html;
@@ -218,24 +220,14 @@ function setMsg(html,type){
 }
 
 function setLoading(on){
-  if(on){
-    loader.classList.add('active');
-  }else{
-    loader.classList.remove('active');
-  }
+  loader.classList.toggle('active', on);
   keyInput.disabled = on;
+  btnIn.disabled = on;
+  btnOut.disabled = on;
 }
 
-const inputWrap = document.getElementById('inputWrap');
-
-function showInput(){
-  inputWrap.style.display = 'block';
-}
-
-function hideInput(){
-  inputWrap.style.display = 'none';
-}
-
+function showInput(){ inputWrap.style.display = 'block'; }
+function hideInput(){ inputWrap.style.display = 'none'; }
 
 function showCheckInOnly(){
   btnIn.classList.remove('hidden');
@@ -256,112 +248,116 @@ function showDone(){
 }
 
 function resetForm(){
+  localStorage.removeItem('townhallCheckin');
   keyInput.value = '';
   msgBox.className = 'msg hidden';
-
-  showInput();          // ✅ RESTORE TEXTBOX
-  showCheckInOnly();    // ✅ Restore initial buttons
-
+  showInput();
+  showCheckInOnly();
   keyInput.disabled = false;
   keyInput.focus();
 }
 
-async function callAPI(action,key){
-  const r = await fetch(`${API_BASE}?action=${action}&id=${key}&t=${Date.now()}`);
+async function callAPI(action, key){
+  const r = await fetch(`${API_BASE}?action=${action}&id=${encodeURIComponent(key)}&t=${Date.now()}`);
   return r.json();
 }
 
+/* ---------------- CHECK IN ---------------- */
+
 async function handleCheckIn(){
   const key = keyInput.value.trim();
-  if(!key){setMsg('Please enter your Employee ID or mobile number.','err');return;}
+  if(!key){
+    setMsg('Please enter your Employee ID or mobile number.','err');
+    return;
+  }
 
   setLoading(true);
   try{
-    const data = await callAPI('checkin',key);
+    const data = await callAPI('checkin', key);
+
     if(!data.ok){
       setMsg('You are not in the invitee list for this townhall.','err');
       return;
     }
 
     const name = data.employee.name;
+
     if(data.already){
       setMsg(
         `Hi <strong>${name}</strong>, you are already checked in.<br>
          If you are leaving, please check out below.`,
         'ok'
       );
+      hideInput();
       showAlreadyIn();
-      hideInput();
-
-    }else{
+    } else {
       setMsg(
-  `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
-  'ok'
-);
+        `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
+        'ok'
+      );
 
-localStorage.setItem(
-  'townhallCheckin',
-  JSON.stringify({
-    key: key,
-    name: name,
-    checkedIn: true
-  })
-);
+      localStorage.setItem('townhallCheckin', JSON.stringify({
+        key: key,
+        name: name,
+        checkedIn: true
+      }));
+
       hideInput();
-      
       showDone();
     }
+
     refreshSummary();
-  }finally{setLoading(false);}
+  } finally {
+    setLoading(false);
+  }
 }
 
-async function handleCheckOut() {
-  if (!key) {
-    setMsg('Please enter Employee ID or mobile number.', 'error');
+/* ---------------- CHECK OUT ---------------- */
+
+async function handleCheckOut(){
+  const saved = localStorage.getItem('townhallCheckin');
+  const parsed = saved ? JSON.parse(saved) : null;
+  const key = parsed?.key || keyInput.value.trim();
+
+  if(!key){
+    setMsg('Missing check-in reference. Please check in again.','err');
     return;
   }
 
   setLoading(true);
-  setMsg('');
+  try{
+    const data = await callAPI('checkout', key);
 
-  try {
-    const res = await fetch(
-      `${API_URL}?action=checkout&id=${encodeURIComponent(key)}`
-    ).then(r => r.json());
-
-    if (!res.ok) {
-      setMsg(res.error || 'Checkout failed.', 'error');
+    if(!data.ok){
+      setMsg(data.error || 'Checkout failed.','err');
       return;
     }
 
-    const name = res.employee?.name || '';
+    const name = data.employee.name;
 
-    // Already OUT case
-    if (res.already) {
+    if(data.already){
       setMsg(
         `Hi <strong>${name}</strong>, you are not currently checked in.`,
-        'info'
+        'ok'
       );
-      return;
+    } else {
+      setMsg(
+        `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
+        'ok'
+      );
     }
 
-    // Successful checkout
-    setMsg(
-      `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
-      'ok'
-    );
-
-    // Clear local storage
     localStorage.removeItem('townhallCheckin');
+    hideInput();
+    showDone();
+    refreshSummary();
 
-  } catch (err) {
-    console.error(err);
-    setMsg('Network error. Please try again.', 'error');
   } finally {
-    // 🔥 THIS IS THE KEY
     setLoading(false);
   }
 }
+
+/* ---------------- SUMMARY ---------------- */
 
 async function refreshSummary(){
   try{
@@ -372,6 +368,8 @@ async function refreshSummary(){
     }
   }catch(e){}
 }
+
+/* ---------------- AUTO DETECT ---------------- */
 
 function autoDetectPreviousCheckin(){
   const saved = localStorage.getItem('townhallCheckin');
@@ -390,17 +388,17 @@ function autoDetectPreviousCheckin(){
   showAlreadyIn();
 }
 
+/* ---------------- INIT ---------------- */
+
 window.onload = () => {
-  loader.classList.remove('active'); // 🔒 force hide
-  keyInput.disabled = false;
-  showCheckInOnly();
+  setLoading(false);
   showInput();
+  showCheckInOnly();
   refreshSummary();
-  autoDetectPreviousCheckin(); // 👈 NEW
+  autoDetectPreviousCheckin();
   keyInput.focus();
 };
-
-
 </script>
+
 </body>
 </html>
