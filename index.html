@@ -15,8 +15,13 @@ Author: Anooj Korampatta
   --card:#fff;
   --text:#111;
   --muted:#6b7280;
+
   --ok-bg:#e6f6e9;
   --ok-text:#14532d;
+
+  --warn-bg:#fff7cc;
+  --warn-text:#92400e;
+
   --err-bg:#fee2e2;
   --err-text:#7f1d1d;
 }
@@ -85,8 +90,23 @@ input:focus{
   line-height:1.4;
 }
 
-.msg.ok{display:block;background:var(--ok-bg);color:var(--ok-text)}
-.msg.err{display:block;background:var(--err-bg);color:var(--err-text)}
+.msg.ok{
+  display:block;
+  background:var(--ok-bg);
+  color:var(--ok-text);
+}
+
+.msg.warn{
+  display:block;
+  background:var(--warn-bg);
+  color:var(--warn-text);
+}
+
+.msg.err{
+  display:block;
+  background:var(--err-bg);
+  color:var(--err-text);
+}
 
 .btn{
   width:100%;
@@ -185,12 +205,8 @@ input:focus{
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-
 const API_BASE =
   "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
-
-/* ================= ELEMENTS ================= */
 
 const keyInput  = document.getElementById('keyInput');
 const msgBox    = document.getElementById('msgBox');
@@ -200,8 +216,6 @@ const btnBack   = document.getElementById('btnBack');
 const loader    = document.getElementById('loader');
 const summary   = document.getElementById('summary');
 const inputWrap = document.getElementById('inputWrap');
-
-/* ================= HELPERS ================= */
 
 function setMsg(html,type){
   msgBox.innerHTML = html;
@@ -215,13 +229,8 @@ function setLoading(on){
   keyInput.disabled = on;
 }
 
-function showInput(){
-  inputWrap.style.display='block';
-}
-
-function hideInput(){
-  inputWrap.style.display='none';
-}
+function showInput(){ inputWrap.style.display='block'; }
+function hideInput(){ inputWrap.style.display='none'; }
 
 function showCheckIn(){
   btnIn.classList.remove('hidden');
@@ -249,16 +258,12 @@ function resetForm(){
   keyInput.focus();
 }
 
-/* ================= API ================= */
-
 async function callAPI(action, key){
   const r = await fetch(
     `${API_BASE}?action=${action}&id=${encodeURIComponent(key)}&t=${Date.now()}`
   );
   return r.json();
 }
-
-/* ================= CHECK IN ================= */
 
 btnIn.onclick = async () => {
   const key = keyInput.value.trim();
@@ -270,14 +275,12 @@ btnIn.onclick = async () => {
   setLoading(true);
   try{
     const res = await callAPI('checkin', key);
-
     if(!res.ok){
       setMsg(res.error || 'You are not an invitee.','err');
       return;
     }
 
     const name = res.employee.name;
-
     localStorage.setItem('townhallCheckin', JSON.stringify({
       key, name, checkedIn:true
     }));
@@ -286,7 +289,7 @@ btnIn.onclick = async () => {
       setMsg(
         `Hi <strong>${name}</strong>, you are already checked in.<br>
          If you are leaving, please check out below.`,
-        'ok'
+        'warn'
       );
       hideInput();
       showCheckout();
@@ -300,13 +303,10 @@ btnIn.onclick = async () => {
     }
 
     refreshSummary();
-
   }finally{
     setLoading(false);
   }
 };
-
-/* ================= CHECK OUT ================= */
 
 btnOut.onclick = async () => {
   const saved = JSON.parse(localStorage.getItem('townhallCheckin') || '{}');
@@ -319,7 +319,6 @@ btnOut.onclick = async () => {
   setLoading(true);
   try{
     const res = await callAPI('checkout', saved.key);
-
     if(!res.ok){
       setMsg(res.error || 'Checkout failed.','err');
       return;
@@ -334,15 +333,12 @@ btnOut.onclick = async () => {
     hideInput();
     showDone();
     refreshSummary();
-
   }finally{
     setLoading(false);
   }
 };
 
 btnBack.onclick = resetForm;
-
-/* ================= SUMMARY ================= */
 
 async function refreshSummary(){
   try{
@@ -353,8 +349,6 @@ async function refreshSummary(){
     }
   }catch(e){}
 }
-
-/* ================= INIT ================= */
 
 window.onload = () => {
   setLoading(false);
@@ -367,7 +361,7 @@ window.onload = () => {
     setMsg(
       `Hi <strong>${saved.name}</strong>, you are already checked in.<br>
        If you are leaving, please check out below.`,
-      'ok'
+      'warn'
     );
     hideInput();
     showCheckout();
@@ -378,4 +372,5 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
 
