@@ -2,133 +2,129 @@
 Author: Anooj Korampatta
 -->
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Townhall Attendance</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Townhall Attendance</title>
 
-  <style>
-    :root{
-      --primary:#40ae49;
-      --primary-dark:#2f8a36;
-      --bg:#f4f5f7;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --ok-bg:#e6f6e9;
-      --ok-text:#14532d;
-      --err-bg:#fee2e2;
-      --err-text:#7f1d1d;
-    }
+<style>
+:root{
+  --primary:#40ae49;
+  --bg:#f4f5f7;
+  --card:#fff;
+  --text:#111;
+  --muted:#6b7280;
+  --ok-bg:#e6f6e9;
+  --ok-text:#14532d;
+  --err-bg:#fee2e2;
+  --err-text:#7f1d1d;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:radial-gradient(circle at top,#ffffff,#f4f5f7);
-      color:var(--text);
-    }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    .wrap{
-      max-width:420px;
-      margin:40px auto;
-      padding:0 16px;
-    }
+.wrap{
+  max-width:420px;
+  margin:40px auto;
+  padding:0 16px;
+}
 
-    .card{
-      background:var(--card);
-      border-radius:22px;
-      padding:26px 22px 28px;
-      box-shadow:0 18px 40px rgba(0,0,0,.12);
-      position:relative;
-    }
+.card{
+  background:var(--card);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 18px 40px rgba(0,0,0,.12);
+  position:relative;
+}
 
-    h1{
-      margin:0;
-      text-align:center;
-      font-size:22px;
-      font-weight:700;
-    }
+h1{
+  margin:0;
+  text-align:center;
+  font-size:22px;
+}
 
-    .subtitle{
-      text-align:center;
-      margin:6px 0 22px;
-      font-size:14px;
-      color:var(--muted);
-    }
+.subtitle{
+  text-align:center;
+  margin:6px 0 22px;
+  font-size:14px;
+  color:var(--muted);
+}
 
-    .label{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
+.label{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
 
-    input[type="tel"]{
-      width:100%;
-      padding:14px;
-      font-size:16px;
-      border-radius:12px;
-      border:1px solid #d1d5db;
-      outline:none;
-    }
+input{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border-radius:12px;
+  border:1px solid #d1d5db;
+}
 
-    input:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 0 2px rgba(64,174,73,.18);
-    }
+input:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(64,174,73,.2);
+}
 
-    .msg{
-      display:none;
-      margin-bottom:16px;
-      padding:14px;
-      border-radius:14px;
-      font-size:16px;
-      line-height:1.4;
-    }
-    .msg.ok{background:var(--ok-bg);color:var(--ok-text);display:block;}
-    .msg.err{background:var(--err-bg);color:var(--err-text);display:block;}
+.msg{
+  display:none;
+  margin-bottom:16px;
+  padding:14px;
+  border-radius:14px;
+  font-size:15px;
+  line-height:1.4;
+}
 
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:999px;
-      padding:14px;
-      font-size:16px;
-      font-weight:600;
-      margin-top:12px;
-      cursor:pointer;
-    }
+.msg.ok{display:block;background:var(--ok-bg);color:var(--ok-text)}
+.msg.err{display:block;background:var(--err-bg);color:var(--err-text)}
 
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
-      box-shadow:0 8px 18px rgba(64,174,73,.35);
-    }
+.btn{
+  width:100%;
+  border:none;
+  border-radius:999px;
+  padding:14px;
+  font-size:16px;
+  font-weight:600;
+  margin-top:12px;
+  cursor:pointer;
+}
 
-    .btn-outline{
-      background:#f3f4f6;
-      color:#111827;
-    }
+.btn-primary{
+  background:var(--primary);
+  color:#fff;
+}
 
-    .btn-text{
-      background:none;
-      color:var(--muted);
-      font-size:14px;
-      margin-top:10px;
-    }
+.btn-outline{
+  background:#f3f4f6;
+}
 
-    .hidden{display:none}
+.btn-text{
+  background:none;
+  color:var(--muted);
+  font-size:14px;
+}
 
-    .summary{
-      margin-top:18px;
-      text-align:center;
-      font-size:13px;
-      color:var(--muted);
-    }
+.hidden{display:none}
 
-    .loader{
-  display:none;               /* 🔒 HARD STOP */
+.summary{
+  margin-top:16px;
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.loader{
+  display:none;
   position:absolute;
   left:50%;
   bottom:14px;
@@ -140,30 +136,21 @@ Author: Anooj Korampatta
   background:#fff;
   box-shadow:0 6px 16px rgba(0,0,0,.15);
   font-size:13px;
-  color:var(--muted);
-}
-.loader.active{
-  display:flex;               /* 🔓 only when active */
 }
 
-    .spinner{
-      width:16px;
-      height:16px;
-      border-radius:50%;
-      border:3px solid #d1fae5;
-      border-top-color:var(--primary);
-      animation:spin .8s linear infinite;
-    }
+.loader.active{display:flex}
 
-    @keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  border:3px solid #d1fae5;
+  border-top-color:var(--primary);
+  animation:spin .8s linear infinite;
+}
 
-    footer{
-      text-align:center;
-      margin-top:14px;
-      font-size:11px;
-      color:#9ca3af;
-    }
-  </style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 
 <body>
@@ -171,55 +158,51 @@ Author: Anooj Korampatta
   <div class="card">
 
     <h1>Townhall Attendance</h1>
-    <div class="subtitle">On-site check-in for invitees</div>
+    <div class="subtitle">On-site check-in</div>
 
-    <!-- MESSAGE ALWAYS AT TOP -->
     <div id="msgBox" class="msg"></div>
 
     <div id="inputWrap">
-  <div class="label">Employee ID or Mobile (without country code)</div>
-  <input id="keyInput"
-         type="tel"
-         inputmode="numeric"
-         oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-         placeholder="e.g. 11104 or 33591326">
-</div>
+      <div class="label">Employee ID or Mobile Number</div>
+      <input id="keyInput"
+             type="tel"
+             inputmode="numeric"
+             placeholder="e.g. 11104 or 33591326"
+             oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    </div>
 
-
-    <!-- BUTTONS -->
-    <button id="btnIn" class="btn btn-primary" onclick="handleCheckIn()">Check In</button>
-    <button id="btnOut" class="btn btn-outline hidden" onclick="handleCheckOut()">Check Out</button>
-    <button id="btnBack" class="btn btn-text hidden" onclick="resetForm()">Go back</button>
+    <button id="btnIn"  class="btn btn-primary">Check In</button>
+    <button id="btnOut" class="btn btn-outline hidden">Check Out</button>
+    <button id="btnBack" class="btn btn-text hidden">Go back</button>
 
     <div id="summary" class="summary"></div>
 
-    <div id="loader" class="loader hidden">
+    <div id="loader" class="loader">
       <div class="spinner"></div> Processing…
     </div>
-  </div>
 
-  <footer>©2026 Anooj Korampatta | GWC Townhall | V2</footer>
+  </div>
 </div>
 
 <script>
-  
+/* ================= CONFIG ================= */
+
 const API_BASE =
   "https://script.google.com/macros/s/AKfycbwoYM9XucLEejIqz9qTs3LysIyW7H45azxfq3nlkIj5aBly8N9LdLkuKJX661JWREgOPw/exec";
 
-const keyInput = document.getElementById('keyInput');
-const msgBox   = document.getElementById('msgBox');
-const btnIn    = document.getElementById('btnIn');
-const btnOut   = document.getElementById('btnOut');
-const btnBack  = document.getElementById('btnBack');
-const loader   = document.getElementById('loader');
-const summary  = document.getElementById('summary');
+/* ================= ELEMENTS ================= */
+
+const keyInput  = document.getElementById('keyInput');
+const msgBox    = document.getElementById('msgBox');
+const btnIn     = document.getElementById('btnIn');
+const btnOut    = document.getElementById('btnOut');
+const btnBack   = document.getElementById('btnBack');
+const loader    = document.getElementById('loader');
+const summary   = document.getElementById('summary');
 const inputWrap = document.getElementById('inputWrap');
 
-function getEnteredKey() {
-  const input = document.getElementById('keyInput');
-  return input ? input.value.trim() : '';
-}
-  
+/* ================= HELPERS ================= */
+
 function setMsg(html,type){
   msgBox.innerHTML = html;
   msgBox.className = 'msg ' + type;
@@ -227,38 +210,26 @@ function setMsg(html,type){
 
 function setLoading(on){
   loader.classList.toggle('active', on);
-  keyInput.disabled = on;
   btnIn.disabled = on;
   btnOut.disabled = on;
+  keyInput.disabled = on;
 }
 
-function showInput() {
-  inputBox.style.display = 'block';
-  checkInBtn.style.display = 'block';
-  checkOutBtn.style.display = 'none';
-}
-function hideInput(){ inputWrap.style.display = 'none'; }
-
-  function showCheckoutOnly() {
-  inputBox.style.display = 'none';
-  checkInBtn.style.display = 'none';
-  checkOutBtn.style.display = 'block';
+function showInput(){
+  inputWrap.style.display='block';
 }
 
-  
-function showCheckInOnly(){
+function hideInput(){
+  inputWrap.style.display='none';
+}
+
+function showCheckIn(){
   btnIn.classList.remove('hidden');
   btnOut.classList.add('hidden');
   btnBack.classList.add('hidden');
 }
 
-function showMessageOnly() {
-  inputBox.style.display = 'none';
-  checkInBtn.style.display = 'none';
-  checkOutBtn.style.display = 'none';
-}
-
-function showAlreadyIn(){
+function showCheckout(){
   btnIn.classList.add('hidden');
   btnOut.classList.remove('hidden');
   btnBack.classList.remove('hidden');
@@ -271,120 +242,107 @@ function showDone(){
 }
 
 function resetForm(){
-  localStorage.removeItem('townhallCheckin');
-  keyInput.value = '';
-  msgBox.className = 'msg hidden';
+  keyInput.value='';
+  msgBox.className='msg hidden';
   showInput();
-  showCheckInOnly();
-  keyInput.disabled = false;
+  showCheckIn();
   keyInput.focus();
 }
 
+/* ================= API ================= */
+
 async function callAPI(action, key){
-  const r = await fetch(`${API_BASE}?action=${action}&id=${encodeURIComponent(key)}&t=${Date.now()}`);
+  const r = await fetch(
+    `${API_BASE}?action=${action}&id=${encodeURIComponent(key)}&t=${Date.now()}`
+  );
   return r.json();
 }
 
-/* ---------------- CHECK IN ---------------- */
+/* ================= CHECK IN ================= */
 
-async function handleCheckIn() {
-  const key = getEnteredKey();
-
-  if (!key) {
-    setMsg('Please enter Employee ID or mobile number.', 'error');
+btnIn.onclick = async () => {
+  const key = keyInput.value.trim();
+  if(!key){
+    setMsg('Please enter Employee ID or mobile number.','err');
     return;
   }
 
   setLoading(true);
-  setMsg('');
+  try{
+    const res = await callAPI('checkin', key);
 
-  try {
-    const res = await fetch(
-      `${API_URL}?action=checkin&id=${encodeURIComponent(key)}`
-    ).then(r => r.json());
-
-    if (!res.ok) {
-      setMsg(res.error || 'You are not in the invitee list for this townhall.', 'error');
+    if(!res.ok){
+      setMsg(res.error || 'You are not an invitee.','err');
       return;
     }
 
     const name = res.employee.name;
 
-    if (res.already) {
+    localStorage.setItem('townhallCheckin', JSON.stringify({
+      key, name, checkedIn:true
+    }));
+
+    if(res.already){
       setMsg(
-        `Hi <strong>${name}</strong>, you are already checked in. If you are leaving, please check out below.`,
+        `Hi <strong>${name}</strong>, you are already checked in.<br>
+         If you are leaving, please check out below.`,
         'ok'
       );
-      showCheckoutOnly(); // UI helper
-    } else {
+      hideInput();
+      showCheckout();
+    }else{
       setMsg(
         `Hi <strong>${name}</strong>, your check-in has been registered ✅`,
         'ok'
       );
-      showMessageOnly(); // hides input correctly
+      hideInput();
+      showDone();
     }
 
-    // Store ONLY for UX
-    localStorage.setItem(
-      'townhallCheckin',
-      JSON.stringify({ key, name, checkedIn: true })
-    );
+    refreshSummary();
 
-    await refreshSummary();
-
-  } catch (e) {
-    setMsg('Network error. Please try again.', 'error');
-  } finally {
+  }finally{
     setLoading(false);
   }
-}
+};
 
+/* ================= CHECK OUT ================= */
 
-/* ---------------- CHECK OUT ---------------- */
-
-async function handleCheckOut() {
+btnOut.onclick = async () => {
   const saved = JSON.parse(localStorage.getItem('townhallCheckin') || '{}');
-  const key = saved.key;
-
-  if (!key) {
-    setMsg('Session expired. Please enter your ID again.', 'error');
-    showInput();
+  if(!saved.key){
+    setMsg('Session expired. Please check in again.','err');
+    resetForm();
     return;
   }
 
   setLoading(true);
-  setMsg('');
+  try{
+    const res = await callAPI('checkout', saved.key);
 
-  try {
-    const res = await fetch(
-      `${API_URL}?action=checkout&id=${encodeURIComponent(key)}`
-    ).then(r => r.json());
-
-    if (!res.ok) {
-      setMsg(res.error || 'Checkout failed.', 'error');
+    if(!res.ok){
+      setMsg(res.error || 'Checkout failed.','err');
       return;
     }
 
-    const name = res.employee.name;
-
     setMsg(
-      `Hi <strong>${name}</strong>, your check-out has been registered ✅`,
+      `Hi <strong>${res.employee.name}</strong>, your check-out has been registered ✅`,
       'ok'
     );
 
     localStorage.removeItem('townhallCheckin');
-    showMessageOnly();
-    await refreshSummary();
+    hideInput();
+    showDone();
+    refreshSummary();
 
-  } catch (e) {
-    setMsg('Network error. Please try again.', 'error');
-  } finally {
+  }finally{
     setLoading(false);
   }
-}
+};
 
+btnBack.onclick = resetForm;
 
-/* ---------------- SUMMARY ---------------- */
+/* ================= SUMMARY ================= */
 
 async function refreshSummary(){
   try{
@@ -396,36 +354,28 @@ async function refreshSummary(){
   }catch(e){}
 }
 
-/* ---------------- AUTO DETECT ---------------- */
-
-function autoDetectPreviousCheckin(){
-  const saved = localStorage.getItem('townhallCheckin');
-  if(!saved) return;
-
-  const data = JSON.parse(saved);
-  if(!data.checkedIn) return;
-
-  setMsg(
-    `Hi <strong>${data.name}</strong>, you are already checked in.<br>
-     If you are leaving, please check out below.`,
-    'ok'
-  );
-
-  hideInput();
-  showAlreadyIn();
-}
-
-/* ---------------- INIT ---------------- */
+/* ================= INIT ================= */
 
 window.onload = () => {
   setLoading(false);
   showInput();
-  showCheckInOnly();
+  showCheckIn();
   refreshSummary();
-  autoDetectPreviousCheckin();
+
+  const saved = JSON.parse(localStorage.getItem('townhallCheckin') || '{}');
+  if(saved.checkedIn){
+    setMsg(
+      `Hi <strong>${saved.name}</strong>, you are already checked in.<br>
+       If you are leaving, please check out below.`,
+      'ok'
+    );
+    hideInput();
+    showCheckout();
+  }
+
   keyInput.focus();
 };
 </script>
-
 </body>
 </html>
+
