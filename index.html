@@ -199,11 +199,12 @@ input:focus{
 
     <div id="inputWrap">
       <div class="label">Employee ID or Mobile Number(Without country code)</div>
-      <input id="keyInput"
-             type="tel"
-             inputmode="numeric"
-             placeholder="e.g. 11104 or 33591326"
-             oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      <input
+  id="keyInput"
+  type="text"
+  placeholder="Employee ID / Mobile / Email username"
+  autocomplete="off"
+  oninput="this.value=this.value.replace(/[^a-zA-Z0-9._-]/g,'')">
     </div>
 
     <button id="btnIn"  class="btn btn-primary">Check In</button>
