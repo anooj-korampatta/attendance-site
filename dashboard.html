@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Townhall Dashboard</title>
+
+<style>
+:root{
+  --primary:#40ae49;
+  --bg:#f4f5f7;
+  --card:#ffffff;
+  --text:#111111;
+  --muted:#6b7280;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:24px;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:48px;
+  font-weight:800;
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:30px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.metric{
+  font-size:48px;
+  font-weight:700;
+  color:var(--primary);
+}
+
+.label{
+  color:var(--muted);
+  margin-top:8px;
+}
+
+.latest-name{
+  font-size:28px;
+  font-weight:700;
+}
+
+.latest-time{
+  margin-top:8px;
+  color:var(--muted);
+}
+
+.table-card{
+  background:#fff;
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.table-title{
+  font-size:24px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  padding:14px 0;
+  border-bottom:1px solid #eee;
+}
+
+.row:last-child{
+  border-bottom:none;
+}
+
+.name{
+  font-weight:600;
+}
+
+.time{
+  color:var(--muted);
+}
+
+.pagination{
+  margin-top:20px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  align-items:center;
+}
+
+button{
+  border:none;
+  background:var(--primary);
+  color:#fff;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+.footer{
+  text-align:center;
+  color:#8b93a4;
+  margin-top:40px;
+  font-size:15px;
+}
+
+.live{
+  text-align:center;
+  margin-bottom:20px;
+  color:var(--primary);
+  font-weight:700;
+}
+
+@media(max-width:768px){
+
+  h1{
+    font-size:34px;
+  }
+
+  .metric{
+    font-size:38px;
+  }
+
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Townhall Dashboard</h1>
+<div class="subtitle">ALIGNMENT. ACCOUNTABILITY. AGILITY</div>
+
+<div class="live">● LIVE</div>
+
+<div class="cards">
+
+<div class="card">
+<div class="metric" id="checkedInCount">0</div>
+<div class="label">Checked In</div>
+</div>
+
+<div class="card">
+<div class="metric" id="totalCount">0</div>
+<div class="label">Total Invitees</div>
+</div>
+
+<div class="card">
+<div class="label">Latest Check-In</div>
+<div class="latest-name" id="latestName">—</div>
+<div class="latest-time" id="latestTime">—</div>
+</div>
+
+</div>
+
+<div class="table-card">
+
+<div class="table-title">Recent Check-ins</div>
+
+<div id="tableRows"></div>
+
+<div class="pagination">
+<button id="prevBtn">Previous</button>
+<span id="pageInfo"></span>
+<button id="nextBtn">Next</button>
+</div>
+
+</div>
+
+<div class="footer">
+©2026 Anooj Korampatta | GWC Townhall
+</div>
+
+</div>
+
+<script>
+
+const API_BASE =
+"https://script.google.com/macros/s/AKfycbxZ99YQaNFtMuw8nsHZ2VKEuXmgejMybgHUaJasg-CbhmzFN34nZnQNRmvPQ6WkZM98Vg/exec";
+
+let records = [];
+let page = 1;
+const pageSize = 6;
+
+async function loadDashboard(){
+
+  try{
+
+    const res = await fetch(
+      API_BASE + "?action=dashboard&t=" + Date.now()
+    );
+
+    const data = await res.json();
+
+    document.getElementById("checkedInCount").textContent =
+      data.checkedIn;
+
+    document.getElementById("totalCount").textContent =
+      data.total;
+
+    if(data.latest){
+
+      document.getElementById("latestName").textContent =
+        data.latest.name;
+
+      document.getElementById("latestTime").textContent =
+        new Date(data.latest.timestamp).toLocaleString();
+
+    }
+
+    records = data.recent || [];
+
+    renderTable();
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+function renderTable(){
+
+  const start = (page-1)*pageSize;
+  const end = start + pageSize;
+
+  const rows = records.slice(start,end);
+
+  const holder = document.getElementById("tableRows");
+
+  holder.innerHTML = rows.map(item => `
+    <div class="row">
+      <div class="name">${item.name}</div>
+      <div class="time">
+        ${new Date(item.timestamp).toLocaleTimeString()}
+      </div>
+    </div>
+  `).join("");
+
+  const totalPages =
+    Math.max(1,Math.ceil(records.length/pageSize));
+
+  document.getElementById("pageInfo").textContent =
+    `Page ${page} of ${totalPages}`;
+
+  document.getElementById("prevBtn").disabled =
+    page===1;
+
+  document.getElementById("nextBtn").disabled =
+    page===totalPages;
+}
+
+document.getElementById("prevBtn").onclick=()=>{
+  if(page>1){
+    page--;
+    renderTable();
+  }
+};
+
+document.getElementById("nextBtn").onclick=()=>{
+  const totalPages =
+    Math.ceil(records.length/pageSize);
+
+  if(page<totalPages){
+    page++;
+    renderTable();
+  }
+};
+
+loadDashboard();
+
+setInterval(loadDashboard,15000);
+
+</script>
+
+</body>
+</html>
