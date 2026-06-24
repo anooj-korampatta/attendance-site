@@ -149,6 +149,66 @@ button:disabled{
   color:var(--primary);
   font-weight:700;
 }
+  .dashboard-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.refresh-btn{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#fff;
+  color:var(--primary);
+  font-size:28px;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+.refresh-btn:hover{
+  transform:rotate(180deg);
+  transition:.4s;
+}
+
+.status{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  margin-top:4px;
+}
+
+.status.in{
+  background:#e6f6e9;
+  color:#14532d;
+}
+
+.status.out{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.activity-name{
+  font-weight:600;
+}
+
+.activity-time{
+  color:var(--muted);
+  font-size:13px;
+}
+
+@media(max-width:768px){
+
+  .dashboard-header{
+    flex-direction:column;
+    gap:15px;
+  }
+
+}
 
 @media(max-width:768px){
 
@@ -169,8 +229,18 @@ button:disabled{
 
 <div class="container">
 
-<h1>Townhall Dashboard</h1>
-<div class="subtitle">ALIGNMENT. ACCOUNTABILITY. AGILITY</div>
+<div class="dashboard-header">
+
+  <div>
+    <h1>Townhall Dashboard</h1>
+    <div class="subtitle">ALIGNMENT. ACCOUNTABILITY. AGILITY</div>
+  </div>
+
+  <button id="refreshBtn" class="refresh-btn" title="Refresh">
+    ↻
+  </button>
+
+</div>
 
 <div class="live">● LIVE</div>
 
@@ -196,7 +266,7 @@ button:disabled{
 
 <div class="table-card">
 
-<div class="table-title">Recent Check-ins</div>
+<div class="table-title">Recent Activity</div>
 
 <div id="tableRows"></div>
 
@@ -270,14 +340,32 @@ function renderTable(){
 
   const holder = document.getElementById("tableRows");
 
-  holder.innerHTML = rows.map(item => `
-    <div class="row">
-      <div class="name">${item.name}</div>
-      <div class="time">
-        ${new Date(item.timestamp).toLocaleTimeString()}
+  holder.innerHTML = rows.map(item => {
+
+    const badge =
+      item.action === 'OUT'
+      ? '<span class="status out">CHECK-OUT</span>'
+      : '<span class="status in">CHECK-IN</span>';
+
+    return `
+      <div class="row">
+
+        <div>
+          <div class="activity-name">
+            ${item.name}
+          </div>
+
+          ${badge}
+        </div>
+
+        <div class="activity-time">
+          ${new Date(item.timestamp).toLocaleString()}
+        </div>
+
       </div>
-    </div>
-  `).join("");
+    `;
+
+  }).join("");
 
   const totalPages =
     Math.max(1,Math.ceil(records.length/pageSize));
@@ -308,7 +396,8 @@ document.getElementById("nextBtn").onclick=()=>{
     renderTable();
   }
 };
-
+document.getElementById("refreshBtn")
+  .addEventListener("click", loadDashboard);
 loadDashboard();
 
 setInterval(loadDashboard,15000);
