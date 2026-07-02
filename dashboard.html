@@ -447,53 +447,53 @@ async function loadDashboard() {
     }
 }
 
-function renderTable(){
+function renderTable() {
 
-  const start = (page-1)*pageSize;
-  const end = start + pageSize;
+    const holder = document.getElementById("tableRows");
 
-  const rows = records.slice(start,end);
+    if (!records.length) {
+        holder.innerHTML =
+            "<div style='padding:20px;color:#6b7280'>No activity yet.</div>";
+        return;
+    }
 
-  const holder = document.getElementById("tableRows");
+    const start = (page - 1) * pageSize;
+    const rows = records.slice(start, start + pageSize);
 
-  holder.innerHTML = rows.map(item => {
+    holder.innerHTML = rows.map(item => {
 
-    const badge =
-      item.action === 'OUT'
-      ? '<span class="status out">CHECK-OUT</span>'
-      : '<span class="status in">CHECK-IN</span>';
+        const badge =
+            item.action === "OUT"
+                ? '<span class="status out">CHECK-OUT</span>'
+                : '<span class="status in">CHECK-IN</span>';
 
-    return `
-      <div class="row">
+        const dateText =
+            item.timestamp
+                ? new Date(item.timestamp).toLocaleString()
+                : "-";
 
-        <div>
-          <div class="activity-name">
-            ${item.name}
-          </div>
+        return `
+            <div class="row">
+                <div>
+                    <div class="activity-name">${item.name || "-"}</div>
+                    ${badge}
+                </div>
 
-          ${badge}
-        </div>
+                <div class="activity-time">
+                    ${dateText}
+                </div>
+            </div>
+        `;
 
-        <div class="activity-time">
-          ${new Date(item.timestamp).toLocaleString()}
-        </div>
+    }).join("");
 
-      </div>
-    `;
+    const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
 
-  }).join("");
+    document.getElementById("pageInfo").textContent =
+        `Page ${page} of ${totalPages}`;
 
-  const totalPages =
-    Math.max(1,Math.ceil(records.length/pageSize));
-
-  document.getElementById("pageInfo").textContent =
-    `Page ${page} of ${totalPages}`;
-
-  document.getElementById("prevBtn").disabled =
-    page===1;
-
-  document.getElementById("nextBtn").disabled =
-    page===totalPages;
+    document.getElementById("prevBtn").disabled = page === 1;
+    document.getElementById("nextBtn").disabled = page === totalPages;
 }
 
 document.getElementById("prevBtn").onclick=()=>{
