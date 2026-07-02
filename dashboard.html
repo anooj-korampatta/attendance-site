@@ -387,48 +387,64 @@ document.getElementById("latestTime").textContent="";
 
 }
   
-async function loadDashboard(){
-  showLoading();
+async function loadDashboard() {
 
-  try{
+    showLoading();
 
-    const res = await fetch(
-      API_BASE + "?action=dashboard&t=" + Date.now()
-    );
+    try {
 
-    const data = await res.json();
+        const res = await fetch(
+            API_BASE + "?action=dashboard&t=" + Date.now()
+        );
 
-    document.getElementById("checkedInCount").textContent =
-      data.checkedIn;
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
 
-    document.getElementById("totalCount").textContent =
-      data.total;
+        const data = await res.json();
 
-    if(data.latest){
+        document.getElementById("checkedInCount").textContent =
+            data.checkedIn ?? 0;
 
-      document.getElementById("latestName").textContent =
-    data.latest.name;
+        document.getElementById("totalCount").textContent =
+            data.total ?? 0;
 
-document.getElementById("latestTime").textContent =
-    new Date(data.latest.timestamp).toLocaleString();
+        if (data.latest) {
 
-document.getElementById("latestStatus").innerHTML =
-    data.latest.action === "OUT"
-        ? '<span class="status out">CHECK-OUT</span>'
-        : '<span class="status in">CHECK-IN</span>';
+            document.getElementById("latestName").textContent =
+                data.latest.name || "—";
+
+            document.getElementById("latestTime").textContent =
+                data.latest.timestamp
+                    ? new Date(data.latest.timestamp).toLocaleString()
+                    : "—";
+
+            document.getElementById("latestStatus").innerHTML =
+                data.latest.action === "OUT"
+                    ? '<span class="status out">CHECK-OUT</span>'
+                    : '<span class="status in">CHECK-IN</span>';
+
+        } else {
+
+            document.getElementById("latestName").textContent = "—";
+            document.getElementById("latestTime").textContent = "—";
+            document.getElementById("latestStatus").innerHTML = "";
+
+        }
+
+        records = Array.isArray(data.recent) ? data.recent : [];
+
+        renderTable();
+
+    } catch (err) {
+
+        console.error("Dashboard error:", err);
+
+    } finally {
+
+        hideLoading();
 
     }
-
-    records = data.recent || [];
-    hideLoading();
-
-    renderTable();
-
-  } catch (err) {
-    console.error(err);
-    hideLoading();
-}
-
 }
 
 function renderTable(){
