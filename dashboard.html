@@ -343,7 +343,10 @@ let page = 1;
 const pageSize = 6;
 
 function showLoading(){
-
+document.getElementById("checkedInCount").textContent="";
+document.getElementById("totalCount").textContent="";
+document.getElementById("latestName").textContent="";
+document.getElementById("latestTime").textContent="";
     document.getElementById("checkedInCount")
         .classList.add("skeleton","loading");
 
@@ -355,6 +358,7 @@ function showLoading(){
 
     document.getElementById("latestTime")
         .classList.add("skeleton","loading");
+  document.getElementById("latestStatus").innerHTML = "";
 
     document.getElementById("tableRows").innerHTML=`
         <div class="activity-loading skeleton"></div>
@@ -420,11 +424,13 @@ document.getElementById("latestStatus").innerHTML =
 
     renderTable();
 
-  }catch(err){
+  }ccatch(err){
 
     console.error(err);
 
-  }
+    hideLoading();
+
+}
 
 }
 
@@ -493,8 +499,7 @@ document.getElementById("nextBtn").onclick=()=>{
     renderTable();
   }
 };
-document.getElementById("refreshBtn")
-  .addEventListener("click", loadDashboard);
+
 loadDashboard();
 
 setInterval(loadDashboard,15000);
